@@ -3,13 +3,19 @@
 #include <stdlib.h>
 #include <GL/glew.h>
 #include <GL/glut.h>
+#include <cmath>
+#include <iostream>
+#include "Mesh.h"
+#include <vector>
 
-static class ModelViewer
+class ModelViewer
 {
 public:
 	// @argc and @argv are the command line parameters (they will be passed to GLUT)
 	ModelViewer(char* name, int* argc, char* argv[]);
 	~ModelViewer();
+	void start();
+	static std::vector<Mesh> _meshes;
 private:
 	static void display();
 	static void reshape(int width, int height);

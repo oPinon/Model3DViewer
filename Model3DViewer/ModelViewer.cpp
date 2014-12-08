@@ -1,11 +1,16 @@
 #include "ModelViewer.h"
 
 int _windowID;
-int _width = 400, _height = 600;
-float theta, phi;
+int _width = 800, _height = 800;
+float _sensitivityX = 1.0, _sensitivityY = 1.0;
+float _theta, _phi;
+std::vector<Mesh> ModelViewer::_meshes;
 
 ModelViewer::ModelViewer(char* name, int* argc, char* argv[])
 {
+
+	// GLUT initialisation
+
 	glutInit(argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowSize(_width, _height);
@@ -19,12 +24,16 @@ ModelViewer::ModelViewer(char* name, int* argc, char* argv[])
 	glutMotionFunc(&motion);
 	glutMouseFunc(&mouse);
 
+	// GLEW initialisation
 	glewInit();
 
+	// OpenGL initialisation
 	glClearColor(0.0, 0.1, 0.1, 1.0);
 
-	glutMainLoop();
+}
 
+void ModelViewer::start() {
+	glutMainLoop();
 }
 
 void ModelViewer::display() {
@@ -39,13 +48,16 @@ void ModelViewer::display() {
 		0.1, 60.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(-5, 5, 4,
+	gluLookAt(-5, 0, 0,
 		0.0, 0.0, 0.0,
 		0.0, 1.0, 0.0);
+	glRotatef(_theta, 0.0, 0.0, 1.0);
+	glRotatef(_phi, 0.0, 1.0, 0.0);
+	
 
 	// cube
 	// TODEL
-	GLfloat vertices[3 * 4 * 6] =
+	/*GLfloat vertices[3 * 4 * 6] =
 	{
 		-1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0,  // P3,P2,P1,P0
 		1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0,  // P5,P4,P0,P1
@@ -58,8 +70,12 @@ void ModelViewer::display() {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, vertices);
 	glDrawArrays(GL_QUADS, 0, 4 * 6);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);*/
 	// ENDTODEL
+
+	for (auto& mesh : _meshes) {
+		mesh.render();
+	}
 
 	glutSwapBuffers();
 
@@ -85,12 +101,31 @@ void ModelViewer::special(int key, int x, int y) {
 
 }
 
-void ModelViewer::motion(int x, int y) {
-
-}
+int _lastMouseX, _lastMouseY;
 
 void ModelViewer::mouse(int button, int state, int x, int y) {
 
+	if (state == GLUT_DOWN) {
+		_lastMouseX = x;
+		_lastMouseY = y;
+	}
+}
+
+void ModelViewer::motion(int x, int y) {
+
+	int dx = x - _lastMouseX;
+	int dy = y - _lastMouseY;
+
+	_lastMouseX = x;
+	_lastMouseY = y;
+
+	_phi += _sensitivityX * dx;
+	_theta += _sensitivityY * dy;
+
+	_phi = fmodf(_phi, 360);
+	_theta = fmodf(_theta, 360);
+	
+	glutPostRedisplay();
 }
 
 
