@@ -81,11 +81,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LoadShader.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="ModelViewer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LoadShader.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="ModelViewer.h" />
   </ItemGroup>

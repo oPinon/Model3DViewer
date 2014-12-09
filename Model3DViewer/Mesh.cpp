@@ -5,9 +5,13 @@
 
 using namespace std;
 
+void Mesh::reloadShader() {
+	setShader("Shaders/vertex.glsl", "Shaders/fragment.glsl");
+}
+
 Mesh::Mesh()
 {
-	setShader(0);
+	reloadShader();
 }
 
 Mesh::~Mesh()
@@ -68,7 +72,9 @@ void Mesh::load(std::string filename) {
 	file.close();
 }
 
-void Mesh::setShader(GLuint shaderID) {
+void Mesh::setShader(const char* vertShader, const char* fragShader) {
+
+	GLuint shaderID = initialiseShader(vertShader, fragShader);
 
 	_shader.shaderID = shaderID;
 	_shader.vertPos = glGetAttribLocation(shaderID, _shader.vertName);
@@ -78,6 +84,9 @@ void Mesh::setShader(GLuint shaderID) {
 }
 
 void Mesh::render() {
+
+	glUseProgram(_shader.shaderID);
+
 	glPushMatrix(); {
 
 		float scale = 0.5;
@@ -117,6 +126,8 @@ void Mesh::render() {
 		}
 	}
 	glPopMatrix();
+
+	glUseProgram(0);
 }
 
 void  Mesh::loadVertex(std::string& line) {

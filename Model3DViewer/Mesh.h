@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <fstream>
 #include <iostream>
+#include "LoadShader.h"
 
 /*
 * Loads a 3D model from a wavefront .obj
@@ -45,7 +46,8 @@ public:
 	// loads the model from a given .obj file
 	void load(std::string filename);
 	void render();
-	void setShader(GLuint shaderID);
+	void reloadShader();
+	void setShader(const char* vertShader, const char* fragShader);
 
 	std::vector<float> _vertices;
 	std::vector<float> _texCoords;

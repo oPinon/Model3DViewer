@@ -30,6 +30,8 @@ ModelViewer::ModelViewer(char* name, int* argc, char* argv[])
 	// OpenGL initialisation
 	glClearColor(0.0, 0.1, 0.1, 1.0);
 
+	glEnable(GL_DEPTH_TEST);
+
 }
 
 void ModelViewer::start() {
@@ -53,25 +55,6 @@ void ModelViewer::display() {
 		0.0, 1.0, 0.0);
 	glRotatef(_theta, 0.0, 0.0, 1.0);
 	glRotatef(_phi, 0.0, 1.0, 0.0);
-	
-
-	// cube
-	// TODEL
-	/*GLfloat vertices[3 * 4 * 6] =
-	{
-		-1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0,  // P3,P2,P1,P0
-		1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, 1.0, -1.0, -1.0,  // P5,P4,P0,P1
-		1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0,  // P6,P5,P1,P2
-		-1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0,  // P7,P6,P2,P3
-		-1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0,  // P4,P7,P3,P0
-		-1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0   // P4,P5,P6,P7
-	};
-	glColor3f(1.0, 0.0, 0.0);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, vertices);
-	glDrawArrays(GL_QUADS, 0, 4 * 6);
-	glDisableClientState(GL_VERTEX_ARRAY);*/
-	// ENDTODEL
 
 	for (auto& mesh : _meshes) {
 		mesh.render();
@@ -94,7 +77,11 @@ void ModelViewer::keyboard(unsigned char key, int x, int y) {
 		glutDestroyWindow(_windowID);
 		exit(0);
 		break;
+	case 'v' :
+		for (auto& m : _meshes) { m.reloadShader(); } break;
 	}
+
+	glutPostRedisplay();
 }
 
 void ModelViewer::special(int key, int x, int y) {
