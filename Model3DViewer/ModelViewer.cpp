@@ -1,5 +1,11 @@
 #include "ModelViewer.h"
 
+#include <stdlib.h>
+#include <GL/glew.h>
+#include <GL/glut.h>
+#include <cmath>
+#include <iostream>
+
 int _windowID;
 int _width = 800, _height = 800;
 float _sensitivityX = 1.0, _sensitivityY = 1.0;
@@ -28,7 +34,7 @@ ModelViewer::ModelViewer(char* name, int* argc, char* argv[])
 	glewInit();
 
 	// OpenGL initialisation
-	glClearColor(0.0, 0.1, 0.1, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -78,7 +84,7 @@ void ModelViewer::keyboard(unsigned char key, int x, int y) {
 		exit(0);
 		break;
 	case 'v' :
-		for (auto& m : _meshes) { m.reloadShader(); } break;
+		for (auto& m : _meshes) { m.loadShader(); } break;
 	}
 
 	glutPostRedisplay();

@@ -1,5 +1,7 @@
 #include "LoadShader.h"
 
+#include <iostream>
+
 int checkErrors(const std::string section) {
 
 	int count = 0;

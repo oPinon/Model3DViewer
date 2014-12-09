@@ -1,10 +1,7 @@
 #pragma once
 
-#include <stdlib.h>
 #include <GL/glew.h>
-#include <GL/glut.h>
 #include <string>
-#include <iostream>
 
 int checkErrors(const std::string section);
 

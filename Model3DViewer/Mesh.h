@@ -1,11 +1,9 @@
 #pragma once
 
+#include <GL/glew.h>
 #include <string>
 #include <vector>
-#include <GL/glew.h>
-#include <fstream>
-#include <iostream>
-#include "LoadShader.h"
+#include <array>
 
 /*
 * Loads a 3D model from a wavefront .obj
@@ -32,10 +30,20 @@ struct ShaderAttribs {
 	// shader program ID
 	GLuint shaderID;
 	// GLSL attributes' locations in the shader code
+	GLint texPos; char* texName = "textures";
 	GLint vertPos; char* vertName = "vertex";
 	GLint normalPos; char* normalName = "normal";
 	GLint tanPos; char* tanName = "tangent";
 	GLint bitanPos; char* bitanName = "bitangent";
+};
+
+struct Textures {
+	GLuint diffuse;
+	GLuint normals;
+	GLuint spec;
+	GLuint alpha;
+	GLuint emit;
+	GLuint matCap;
 };
 
 class Mesh
@@ -46,7 +54,8 @@ public:
 	// loads the model from a given .obj file
 	void load(std::string filename);
 	void render();
-	void reloadShader();
+	void loadShader();
+	void loadTextures();
 	void setShader(const char* vertShader, const char* fragShader);
 
 	std::vector<float> _vertices;
@@ -58,6 +67,7 @@ public:
 
 private:
 	ShaderAttribs _shader;
+	Textures _textures;
 	void loadVertex(std::string& line);
 	void loadFace(std::string& line);
 	void loadTexCoords(std::string& line);

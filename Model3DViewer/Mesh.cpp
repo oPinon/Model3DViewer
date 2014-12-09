@@ -3,15 +3,41 @@
 #include <fstream>
 #include <iostream>
 
+#include "LoadShader.h"
+#include "LoadTexture.h"
+
 using namespace std;
 
-void Mesh::reloadShader() {
+void Mesh::loadShader() {
 	setShader("Shaders/vertex.glsl", "Shaders/fragment.glsl");
+}
+
+void Mesh::loadTextures() {
+
+	glActiveTexture(GL_TEXTURE0);
+	loadTexture("Textures/Diffuse.bmp", _textures.diffuse);
+
+	glActiveTexture(GL_TEXTURE1);
+	loadTexture("Textures/Normals.bmp", _textures.normals);
+
+	glActiveTexture(GL_TEXTURE2);
+	loadTexture("Textures/Specular.bmp", _textures.spec);
+
+	glActiveTexture(GL_TEXTURE3);
+	loadTexture("Textures/Alpha.bmp", _textures.alpha);
+
+	glActiveTexture(GL_TEXTURE4);
+	loadTexture("Textures/Emit.bmp", _textures.emit);
+
+	glActiveTexture(GL_TEXTURE5);
+	loadTexture("Textures/MatCap.bmp", _textures.matCap);
+
 }
 
 Mesh::Mesh()
 {
-	reloadShader();
+	loadShader();
+	loadTextures();
 }
 
 Mesh::~Mesh()
@@ -77,10 +103,12 @@ void Mesh::setShader(const char* vertShader, const char* fragShader) {
 	GLuint shaderID = initialiseShader(vertShader, fragShader);
 
 	_shader.shaderID = shaderID;
+	_shader.texPos = glGetUniformLocation(shaderID, _shader.texName);
 	_shader.vertPos = glGetAttribLocation(shaderID, _shader.vertName);
 	_shader.normalPos = glGetAttribLocation(shaderID, _shader.normalName);
 	_shader.tanPos = glGetAttribLocation(shaderID, _shader.tanName);
 	_shader.bitanPos = glGetAttribLocation(shaderID, _shader.bitanName);
+
 }
 
 void Mesh::render() {
@@ -92,6 +120,9 @@ void Mesh::render() {
 		float scale = 0.5;
 		glScalef(scale, scale, scale);
 		glTranslatef(0.0, -4.0, 0.0);
+
+		const GLint samplers[6] = { 0, 1, 2, 3, 4, 5 };
+		glUniform1iv(_shader.texPos, 6, samplers);
 
 		for (unsigned int i = 0; i < _faces.size(); i++) {
 			Face f = _faces[i];
