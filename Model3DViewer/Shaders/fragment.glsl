@@ -26,7 +26,7 @@ void main( void )
 	// MatCap
 	vec4 matcap = texture2D( textures[5],  vec2( N.x + 1.0, N.y + 1.0 )/2.0 );
 	float fresnel = pow( (1.-N.z), 2.);
-	color += matcap * fresnel * specular;
+	color += matcap * fresnel * max(0.,dot(- normalize(position),normal));
 
 	// Diffuse and Specular lighting
 	vec3 lightPos = vec3(20.,0.,5.);

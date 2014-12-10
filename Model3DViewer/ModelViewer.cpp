@@ -9,7 +9,7 @@
 int _windowID;
 int _width = 800, _height = 800;
 float _sensitivityX = 1.0, _sensitivityY = 1.0;
-float _theta, _phi;
+float _theta, _phi = -50;
 std::vector<Mesh> ModelViewer::_meshes;
 
 ModelViewer::ModelViewer(char* name, int* argc, char* argv[])
@@ -34,7 +34,7 @@ ModelViewer::ModelViewer(char* name, int* argc, char* argv[])
 	glewInit();
 
 	// OpenGL initialisation
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearColor(0.1, 0.1, 0.1, 1.0);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -52,11 +52,11 @@ void ModelViewer::display() {
 	// camera matrices
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(40.0, (GLdouble)_width / (GLdouble)_height,
+	gluPerspective(60.0, (GLdouble)_width / (GLdouble)_height,
 		0.1, 60.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(-5, 0, 0,
+	gluLookAt(-3, 0, 0,
 		0.0, 0.0, 0.0,
 		0.0, 1.0, 0.0);
 	glRotatef(_theta, 0.0, 0.0, 1.0);

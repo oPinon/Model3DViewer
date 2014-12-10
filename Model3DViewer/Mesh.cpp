@@ -119,9 +119,9 @@ void Mesh::render() {
 
 	glPushMatrix(); {
 
-		float scale = 0.5;
+		float scale = 0.35;
 		glScalef(scale, scale, scale);
-		glTranslatef(0.0, -4.0, 0.0);
+		glTranslatef(0.0, -3.5, 0.0);
 
 		glUniform1iv(_shader.texPos, 6, samplers);
 
@@ -373,6 +373,8 @@ void normalize(Vec3& v) {
 	v.x /= norm; v.y /= norm; v.z /= norm;
 }
 
+float sgn(float input) { return (input >= 0 ? 1.0 : -1.0); }
+
 void Mesh::computeTriangle(unsigned int& v0, unsigned int& v1, unsigned int& v2, unsigned int& vt0, unsigned int& vt1, unsigned int& vt2, vector<vector<Vec3>>& tanLists, vector<vector<Vec3>>& bitanLists) {
 
 	// vertices
@@ -392,6 +394,8 @@ void Mesh::computeTriangle(unsigned int& v0, unsigned int& v1, unsigned int& v2,
 	// texCoord deltas
 	Vec2 deltaUV1 = { uv1.x - uv0.x, uv1.y - uv0.y };
 	Vec2 deltaUV2 = { uv2.x - uv0.x, uv2.y - uv0.y };
+
+	//float flippedFactor = sgn(deltaUV1.x) * sgn(deltaPos1.x); ?? how to make tangent coherent ?
 
 	float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y*deltaUV2.x);
 

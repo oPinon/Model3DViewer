@@ -21,6 +21,6 @@ void main( void )
 
    gl_TexCoord[0] = gl_MultiTexCoord0;
 
-   tanVec = normalize( gl_NormalMatrix * abs(tangent) ); // HACK : "abs" shouldn't be used, but tan and bitan are incoherent
-   bitanVec = normalize( gl_NormalMatrix * abs(bitangent) );
+   tanVec = normalize( gl_NormalMatrix * tangent );
+   bitanVec = normalize( gl_NormalMatrix * bitangent );
 }
