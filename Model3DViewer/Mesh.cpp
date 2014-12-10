@@ -111,6 +111,8 @@ void Mesh::setShader(const char* vertShader, const char* fragShader) {
 
 }
 
+const GLint samplers[6] = { 0, 1, 2, 3, 4, 5 };
+
 void Mesh::render() {
 
 	glUseProgram(_shader.shaderID);
@@ -121,11 +123,10 @@ void Mesh::render() {
 		glScalef(scale, scale, scale);
 		glTranslatef(0.0, -4.0, 0.0);
 
-		const GLint samplers[6] = { 0, 1, 2, 3, 4, 5 };
 		glUniform1iv(_shader.texPos, 6, samplers);
 
 		for (unsigned int i = 0; i < _faces.size(); i++) {
-			Face f = _faces[i];
+			Face& f = _faces[i];
 			glBegin(f.isQuad ? GL_QUADS : GL_TRIANGLES);
 
 			if (f.hasTexCoords) glTexCoord2fv(&_texCoords[2 * f.vt0]);
@@ -150,6 +151,7 @@ void Mesh::render() {
 				glVertexAttrib3fv(0, &_vertices[3 * f.v3]);
 			}
 			if (f.hasNormals) {
+				//if(i<10) cout << f.tan.z << endl;
 				glVertexAttrib3f(_shader.tanPos, f.tan.x, f.tan.y, f.tan.z);
 				glVertexAttrib3f(_shader.bitanPos, f.bitan.x, f.bitan.y, f.bitan.z);
 			}
@@ -227,7 +229,7 @@ void  Mesh::loadFace(std::string& line) {
 
 	Face toReturn;
 
-	FaceVertData v0 = getFaceVertData(line);
+	FaceVertData& v0 = getFaceVertData(line);
 	toReturn.v0 = v0.v;
 	toReturn.hasTexCoords = v0.hasVt;
 	if (v0.hasVt) { toReturn.vt0 = v0.vt; }
@@ -235,13 +237,13 @@ void  Mesh::loadFace(std::string& line) {
 	if (v0.hasVn) { toReturn.vn0 = v0.vn; }
 
 	line = line.substr(line.find(' ') + 1, string::npos);
-	FaceVertData v1 = getFaceVertData(line);
+	FaceVertData& v1 = getFaceVertData(line);
 	toReturn.v1 = v1.v;
 	if (v1.hasVt) { toReturn.vt1 = v1.vt; }
 	if (v1.hasVn) { toReturn.vn1 = v1.vn; }
 
 	line = line.substr(line.find(' ') + 1, string::npos);
-	FaceVertData v2 = getFaceVertData(line);
+	FaceVertData& v2 = getFaceVertData(line);
 	toReturn.v2 = v2.v;
 	if (v2.hasVt) { toReturn.vt2 = v2.vt; }
 	if (v2.hasVn) { toReturn.vn2 = v2.vn; }
@@ -252,7 +254,7 @@ void  Mesh::loadFace(std::string& line) {
 	}
 	else {
 		toReturn.isQuad = true;
-		FaceVertData v3 = getFaceVertData(line);
+		FaceVertData& v3 = getFaceVertData(line);
 		toReturn.v3 = v3.v;
 		if (v3.hasVt) { toReturn.vt3 = v3.vt; }
 		if (v3.hasVn) { toReturn.vn3 = v3.vn; }
@@ -338,7 +340,7 @@ void Mesh::computeNormals() {
 	for (unsigned int i = 0; i < _vertices.size() / 3; i++) { // average all normals for each vertex
 		float nx = 0, ny = 0, nz = 0;
 		for (unsigned int j = 0; j < normals[i].size(); j++) {
-			Normal normal = (normals[i])[j];
+			Normal& normal = (normals[i])[j];
 			nx += normal.x;
 			ny += normal.y;
 			nz += normal.z;
@@ -360,24 +362,31 @@ void Mesh::computeTangents() {
 
 	struct Vec2 { float x, y; };
 
-	for (Face f : _faces) {
+	for (Face& f : _faces) {
 		if (f.hasTexCoords) {
 
-			Vec2 vt0 = { _texCoords[2 * f.vt0], _texCoords[2 * f.vt0 + 1] };
-			Vec2 vt1 = { _texCoords[2 * f.vt1], _texCoords[2 * f.vt1 + 1] };
-			Vec2 vt2 = { _texCoords[2 * f.vt2], _texCoords[2 * f.vt2 + 1] };
-			Vec2 dt0 = { vt1.x - vt0.x, vt1.y - vt0.y };
-			Vec2 dt1 = { vt2.x - vt0.x, vt2.y - vt0.y };
-			float r = 1.0f / (dt0.x*dt1.y - dt0.y*dt1.x);
-
+			// vertices
 			Vec3 v0 = { _vertices[3 * f.v0 + 0], _vertices[3 * f.v0 + 1], _vertices[3 * f.v0 + 2] };
 			Vec3 v1 = { _vertices[3 * f.v1 + 0], _vertices[3 * f.v1 + 1], _vertices[3 * f.v1 + 2] };
 			Vec3 v2 = { _vertices[3 * f.v2 + 0], _vertices[3 * f.v2 + 1], _vertices[3 * f.v2 + 2] };
-			Vec3 dv0 = { v1.x - v0.x, v1.y - v0.y, v1.z - v0.z };
-			Vec3 dv1 = { v2.x - v0.x, v2.y - v0.y, v2.z - v0.z };
 
-			f.tan = { r*(dv0.x*dt1.y - dv1.x*dt0.y), r*(dv0.y*dt1.y - dv1.y*dt0.y), r*(dv0.z*dt1.y - dv1.z*dt0.y) };
-			f.bitan = { -r*(dv0.x*dt1.x - dv1.x*dt0.x), -r*(dv0.y*dt1.x - dv1.y*dt0.x), -r*(dv0.z*dt1.x - dv1.z*dt0.x) };
+			// texture coordinates
+			Vec2 uv0 = { _texCoords[2 * f.vt0], _texCoords[2 * f.vt0 + 1] };
+			Vec2 uv1 = { _texCoords[2 * f.vt1], _texCoords[2 * f.vt1 + 1] };
+			Vec2 uv2 = { _texCoords[2 * f.vt2], _texCoords[2 * f.vt2 + 1] };
+
+			// vertices deltas
+			Vec3 deltaPos1 = { v1.x - v0.x, v1.y - v0.y, v1.z - v0.z };
+			Vec3 deltaPos2 = { v2.x - v0.x, v2.y - v0.y, v2.z - v0.z };
+
+			// texCoord deltas
+			Vec2 deltaUV1 = { uv1.x - uv0.x, uv1.y - uv0.y };
+			Vec2 deltaUV2 = { uv2.x - uv0.x, uv2.y - uv0.y };
+
+			float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y*deltaUV2.x);
+
+			f.tan = { r*(deltaPos1.x*deltaUV2.y - deltaPos2.x*deltaUV1.y), r*(deltaPos1.y*deltaUV2.y - deltaPos2.y*deltaUV1.y), r*(deltaPos1.z*deltaUV2.y - deltaPos2.z*deltaUV1.y) };
+			f.bitan = { r*(deltaPos2.x*deltaUV1.x - deltaPos1.x*deltaUV2.x), r*(deltaPos2.y*deltaUV1.x - deltaPos1.y*deltaUV2.x), r*(deltaPos2.z*deltaUV1.x - deltaPos1.z*deltaUV2.x) };
 		}
 	}
 }
