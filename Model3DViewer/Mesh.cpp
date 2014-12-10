@@ -130,30 +130,37 @@ void Mesh::render() {
 			glBegin(f.isQuad ? GL_QUADS : GL_TRIANGLES);
 
 			if (f.hasTexCoords) glTexCoord2fv(&_texCoords[2 * f.vt0]);
-			if (f.hasNormals) glNormal3fv(&_normals[3 * f.vn0]);
-			//glVertex3fv(&_vertices[3 * f.v0]);
+			if (f.hasNormals) {
+				glNormal3fv(&_normals[3 * f.vn0]);
+				glVertexAttrib3f(_shader.tanPos, _tangents[f.v0].x, _tangents[f.v0].y, _tangents[f.v0].z);
+				glVertexAttrib3f(_shader.bitanPos, _bitangents[f.v0].x, _bitangents[f.v0].y, _bitangents[f.v0].z);
+			}
 			glVertexAttrib3fv(0, &_vertices[3 * f.v0]);
 
 			if (f.hasTexCoords) glTexCoord2fv(&_texCoords[2 * f.vt1]);
-			if (f.hasNormals) glNormal3fv(&_normals[3 * f.vn1]);
-			//glVertex3fv(&_vertices[3 * f.v1]);
+			if (f.hasNormals) {
+				glNormal3fv(&_normals[3 * f.vn1]);
+				glVertexAttrib3f(_shader.tanPos, _tangents[f.v1].x, _tangents[f.v1].y, _tangents[f.v1].z);
+				glVertexAttrib3f(_shader.bitanPos, _bitangents[f.v1].x, _bitangents[f.v1].y, _bitangents[f.v1].z);
+			}
 			glVertexAttrib3fv(0, &_vertices[3 * f.v1]);
 
 			if (f.hasTexCoords) glTexCoord2fv(&_texCoords[2 * f.vt2]);
-			if (f.hasNormals) glNormal3fv(&_normals[3 * f.vn2]);
-			//glVertex3fv(&_vertices[3 * f.v2]);
+			if (f.hasNormals) {
+				glNormal3fv(&_normals[3 * f.vn2]);
+				glVertexAttrib3f(_shader.tanPos, _tangents[f.v2].x, _tangents[f.v2].y, _tangents[f.v2].z);
+				glVertexAttrib3f(_shader.bitanPos, _bitangents[f.v2].x, _bitangents[f.v2].y, _bitangents[f.v2].z);
+			}
 			glVertexAttrib3fv(0, &_vertices[3 * f.v2]);
 
 			if (f.isQuad) {
 				if (f.hasTexCoords) glTexCoord2fv(&_texCoords[2 * f.vt3]);
-				if (f.hasNormals) glNormal3fv(&_normals[3 * f.vn3]);
-				//glVertex3fv(&_vertices[3 * f.v3]);
+				if (f.hasNormals) {
+					glNormal3fv(&_normals[3 * f.vn3]);
+					glVertexAttrib3f(_shader.tanPos, _tangents[f.v3].x, _tangents[f.v3].y, _tangents[f.v3].z);
+					glVertexAttrib3f(_shader.bitanPos, _bitangents[f.v3].x, _bitangents[f.v3].y, _bitangents[f.v3].z);
+				}
 				glVertexAttrib3fv(0, &_vertices[3 * f.v3]);
-			}
-			if (f.hasNormals) {
-				//if(i<10) cout << f.tan.z << endl;
-				glVertexAttrib3f(_shader.tanPos, f.tan.x, f.tan.y, f.tan.z);
-				glVertexAttrib3f(_shader.bitanPos, f.bitan.x, f.bitan.y, f.bitan.z);
 			}
 			glEnd();
 		}
@@ -248,11 +255,12 @@ void  Mesh::loadFace(std::string& line) {
 	if (v2.hasVt) { toReturn.vt2 = v2.vt; }
 	if (v2.hasVn) { toReturn.vn2 = v2.vn; }
 
-	line = line.substr(line.find(' ') + 1, string::npos);
-	if (line.size() == 0) {
+	int spacePos = line.find(' ');
+	if (spacePos == -1) {
 		toReturn.isQuad = false;
 	}
 	else {
+		line = line.substr(spacePos+1, string::npos);
 		toReturn.isQuad = true;
 		FaceVertData& v3 = getFaceVertData(line);
 		toReturn.v3 = v3.v;
@@ -358,35 +366,85 @@ void Mesh::computeNormals() {
 	}
 }
 
+struct Vec2 { float x, y; };
+
+void normalize(Vec3& v) {
+	float norm = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+	v.x /= norm; v.y /= norm; v.z /= norm;
+}
+
+void Mesh::computeTriangle(unsigned int& v0, unsigned int& v1, unsigned int& v2, unsigned int& vt0, unsigned int& vt1, unsigned int& vt2, vector<vector<Vec3>>& tanLists, vector<vector<Vec3>>& bitanLists) {
+
+	// vertices
+	Vec3 vert0 = { _vertices[3 * v0 + 0], _vertices[3 * v0 + 1], _vertices[3 * v0 + 2] };
+	Vec3 vert1 = { _vertices[3 * v1 + 0], _vertices[3 * v1 + 1], _vertices[3 * v1 + 2] };
+	Vec3 vert2 = { _vertices[3 * v2 + 0], _vertices[3 * v2 + 1], _vertices[3 * v2 + 2] };
+
+	// texture coordinates
+	Vec2 uv0 = { _texCoords[2 * vt0], _texCoords[2 * vt0 + 1] };
+	Vec2 uv1 = { _texCoords[2 * vt1], _texCoords[2 * vt1 + 1] };
+	Vec2 uv2 = { _texCoords[2 * vt2], _texCoords[2 * vt2 + 1] };
+
+	// vertices deltas
+	Vec3 deltaPos1 = { vert1.x - vert0.x, vert1.y - vert0.y, vert1.z - vert0.z };
+	Vec3 deltaPos2 = { vert2.x - vert0.x, vert2.y - vert0.y, vert2.z - vert0.z };
+
+	// texCoord deltas
+	Vec2 deltaUV1 = { uv1.x - uv0.x, uv1.y - uv0.y };
+	Vec2 deltaUV2 = { uv2.x - uv0.x, uv2.y - uv0.y };
+
+	float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y*deltaUV2.x);
+
+	Vec3 tan = { r*(deltaPos1.x*deltaUV2.y - deltaPos2.x*deltaUV1.y), r*(deltaPos1.y*deltaUV2.y - deltaPos2.y*deltaUV1.y), r*(deltaPos1.z*deltaUV2.y - deltaPos2.z*deltaUV1.y) };
+	Vec3 bitan = { r*(deltaPos2.x*deltaUV1.x - deltaPos1.x*deltaUV2.x), r*(deltaPos2.y*deltaUV1.x - deltaPos1.y*deltaUV2.x), r*(deltaPos2.z*deltaUV1.x - deltaPos1.z*deltaUV2.x) };
+
+	normalize(tan); normalize(bitan);
+
+	tanLists[v0].push_back(tan);
+	tanLists[v1].push_back(tan);
+	tanLists[v2].push_back(tan);
+
+	bitanLists[v0].push_back(bitan);
+	bitanLists[v1].push_back(bitan);
+	bitanLists[v2].push_back(bitan);
+}
+
+void average(const vector<vector<Vec3>>& src, vector<Vec3>& dst) {
+
+	for (unsigned int i = 0; i < dst.size(); i++) {
+		Vec3 sum = { 0, 0, 0 };
+		for (auto& v : src[i]) {
+			sum.x += v.x;
+			sum.y += v.y;
+			sum.z += v.z;
+		}
+		int size = src[i].size();
+		if (size != 0) {
+			dst[i] = { sum.x / size, sum.y / size, sum.z / size };
+		}
+	}
+}
+
 void Mesh::computeTangents() {
 
-	struct Vec2 { float x, y; };
+	unsigned int size = _vertices.size() / 3;
+	vector<vector<Vec3>> tanLists(size), bitanLists(size);
 
 	for (Face& f : _faces) {
 		if (f.hasTexCoords) {
 
-			// vertices
-			Vec3 v0 = { _vertices[3 * f.v0 + 0], _vertices[3 * f.v0 + 1], _vertices[3 * f.v0 + 2] };
-			Vec3 v1 = { _vertices[3 * f.v1 + 0], _vertices[3 * f.v1 + 1], _vertices[3 * f.v1 + 2] };
-			Vec3 v2 = { _vertices[3 * f.v2 + 0], _vertices[3 * f.v2 + 1], _vertices[3 * f.v2 + 2] };
+			computeTriangle(f.v0, f.v1, f.v2, f.vt0, f.vt1, f.vt2, tanLists, bitanLists);
 
-			// texture coordinates
-			Vec2 uv0 = { _texCoords[2 * f.vt0], _texCoords[2 * f.vt0 + 1] };
-			Vec2 uv1 = { _texCoords[2 * f.vt1], _texCoords[2 * f.vt1 + 1] };
-			Vec2 uv2 = { _texCoords[2 * f.vt2], _texCoords[2 * f.vt2 + 1] };
-
-			// vertices deltas
-			Vec3 deltaPos1 = { v1.x - v0.x, v1.y - v0.y, v1.z - v0.z };
-			Vec3 deltaPos2 = { v2.x - v0.x, v2.y - v0.y, v2.z - v0.z };
-
-			// texCoord deltas
-			Vec2 deltaUV1 = { uv1.x - uv0.x, uv1.y - uv0.y };
-			Vec2 deltaUV2 = { uv2.x - uv0.x, uv2.y - uv0.y };
-
-			float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y*deltaUV2.x);
-
-			f.tan = { r*(deltaPos1.x*deltaUV2.y - deltaPos2.x*deltaUV1.y), r*(deltaPos1.y*deltaUV2.y - deltaPos2.y*deltaUV1.y), r*(deltaPos1.z*deltaUV2.y - deltaPos2.z*deltaUV1.y) };
-			f.bitan = { r*(deltaPos2.x*deltaUV1.x - deltaPos1.x*deltaUV2.x), r*(deltaPos2.y*deltaUV1.x - deltaPos1.y*deltaUV2.x), r*(deltaPos2.z*deltaUV1.x - deltaPos1.z*deltaUV2.x) };
+			if (f.isQuad) {
+				computeTriangle(f.v1, f.v2, f.v3, f.vt1, f.vt2, f.vt3, tanLists, bitanLists);
+			}
 		}
 	}
+
+	_tangents = vector<Vec3>(size);
+	_bitangents = vector<Vec3>(size);
+
+	average(tanLists, _tangents);
+	average(bitanLists, _bitangents);
+
 }

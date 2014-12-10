@@ -62,8 +62,9 @@ public:
 	std::vector<float> _texCoords;
 	std::vector<unsigned int> _triangles;
 	std::vector<unsigned int> _quads;
-	std::vector<float> _normals; // in obj each lines do not correspond to vertices
+	std::vector<float> _normals; // in obj each lines does not correspond to a vertex
 	std::vector<Face> _faces;
+	std::vector<Vec3> _tangents, _bitangents;
 
 private:
 	ShaderAttribs _shader;
@@ -74,5 +75,6 @@ private:
 	void loadVertNormals(std::string& line);
 	void computeNormals();
 	void computeTangents();
+	void computeTriangle(unsigned int& v0, unsigned int& v1, unsigned int& v2, unsigned int& vt0, unsigned int& vt1, unsigned int& vt2, std::vector<std::vector<Vec3>>& tanLists, std::vector<std::vector<Vec3>>& bitanLists);
 };
 

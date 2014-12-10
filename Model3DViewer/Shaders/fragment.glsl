@@ -20,15 +20,13 @@ void main( void )
 	if(alpha.x < 0.5) { discard; }
 
 	// Normal Mapping
-	vec3 tangent = vec3(1.,0.,0.); // TO REPLACE
-	vec3 bitangent = vec3(0.,1.,0.); // TO REPLACE
-	vec3 N = normalize( tangent * locNormal.r + bitangent * locNormal.g + normal * locNormal.b );
+	vec3 N = normalize( tanVec * locNormal.r + bitanVec * locNormal.g + normal * locNormal.b );
 
 
 	// MatCap
 	vec4 matcap = texture2D( textures[5],  vec2( N.x + 1.0, N.y + 1.0 )/2.0 );
 	float fresnel = pow( (1.-N.z), 2.);
-	color += matcap * fresnel;
+	color += matcap * fresnel * specular;
 
 	// Diffuse and Specular lighting
 	vec3 lightPos = vec3(20.,0.,5.);
