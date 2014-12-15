@@ -12,7 +12,8 @@ public:
 	void start();
 private:
 	static void loadShader();
-	static GLuint shaderID, ratioPos, zoomPos, offXPos, offYPos;
+	static GLuint shaderID, ratioPos, zoomPos, offXPos, offYPos, rampPos;
+	static GLuint _ramp;
 	static double zoom, offX, offY;
 	static int _windowID, _width, _height;
 	static void display();

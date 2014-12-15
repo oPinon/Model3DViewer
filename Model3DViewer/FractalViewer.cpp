@@ -8,8 +8,8 @@
 int FractalViewer::_windowID;
 int FractalViewer::_width = 800, FractalViewer::_height = 800;
 
-GLuint FractalViewer::shaderID;
-GLuint FractalViewer::ratioPos, FractalViewer::zoomPos, FractalViewer::offXPos, FractalViewer::offYPos;
+GLuint FractalViewer::shaderID, FractalViewer::_ramp = 0;
+GLuint FractalViewer::ratioPos, FractalViewer::zoomPos, FractalViewer::offXPos, FractalViewer::offYPos, FractalViewer::rampPos;
 double FractalViewer::zoom = 1;
 double FractalViewer::offX = 0, FractalViewer::offY = 0;
 
@@ -39,6 +39,8 @@ FractalViewer::FractalViewer(char* name, int* argc, char* argv[])
 
 	loadShader();
 
+	loadTexture("Textures/colRamp.bmp", _ramp);
+
 }
 
 void FractalViewer::loadShader() {
@@ -48,6 +50,7 @@ void FractalViewer::loadShader() {
 	zoomPos = glGetUniformLocation(shaderID, "zoom");
 	offXPos = glGetUniformLocation(shaderID, "offX");
 	offYPos = glGetUniformLocation(shaderID, "offY");
+	rampPos = glGetUniformLocation(shaderID, "colRamp");
 }
 
 void FractalViewer::start() {
@@ -73,6 +76,7 @@ void FractalViewer::display() {
 	glUniform1d(zoomPos, zoom);
 	glUniform1d(offXPos, offX);
 	glUniform1d(offYPos, offY);
+	glUniform1i(shaderID, _ramp);
 
 	// Quad with fractals on it
 	glBegin(GL_QUADS);
