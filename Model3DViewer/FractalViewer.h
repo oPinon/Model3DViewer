@@ -12,7 +12,8 @@ public:
 	void start();
 private:
 	static void loadShader();
-	static GLuint shaderID;
+	static GLuint shaderID, ratioPos, zoomPos, offXPos, offYPos;
+	static float zoom, offX, offY;
 	static int _windowID, _width, _height;
 	static void display();
 	static void reshape(int width, int height);

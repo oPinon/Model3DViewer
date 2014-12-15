@@ -9,6 +9,9 @@ int FractalViewer::_windowID;
 int FractalViewer::_width = 800, FractalViewer::_height = 800;
 
 GLuint FractalViewer::shaderID;
+GLuint FractalViewer::ratioPos, FractalViewer::zoomPos, FractalViewer::offXPos, FractalViewer::offYPos;
+float FractalViewer::zoom = 1;
+float FractalViewer::offX = 0, FractalViewer::offY = 0;
 
 FractalViewer::FractalViewer(char* name, int* argc, char* argv[])
 {
@@ -41,7 +44,10 @@ FractalViewer::FractalViewer(char* name, int* argc, char* argv[])
 void FractalViewer::loadShader() {
 
 	shaderID = initialiseShader("Shaders/fractalVert.glsl", "Shaders/FractalFrag.glsl");
-
+	ratioPos = glGetUniformLocation(shaderID, "ratio");
+	zoomPos = glGetUniformLocation(shaderID, "zoom");
+	offXPos = glGetUniformLocation(shaderID, "offX");
+	offYPos = glGetUniformLocation(shaderID, "offY");
 }
 
 void FractalViewer::start() {
@@ -60,8 +66,15 @@ void FractalViewer::display() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	// Quad with fractals on it
 	glUseProgram(shaderID);
+
+	// sending parameters to shader
+	glUniform1f(ratioPos, ((float)_width) / _height);
+	glUniform1f(zoomPos, zoom);
+	glUniform1f(offXPos, offX);
+	glUniform1f(offYPos, offY);
+
+	// Quad with fractals on it
 	glBegin(GL_QUADS);
 	glVertex2f(-1., -1.);
 	glVertex2f(1., -1.);
@@ -104,6 +117,23 @@ void FractalViewer::motion(int x, int y) {
 
 void FractalViewer::mouse(int button, int state, int x, int y) {
 
+	if (state == GLUT_DOWN) {
+
+		offX += zoom * 2*((float)x - _width / 2) / _width;
+		offY -= zoom * 2*((float)y - _height / 2) / _height;
+
+		switch (button) {
+		case GLUT_LEFT_BUTTON :
+			zoom /= 2.0;
+			break;
+		case GLUT_RIGHT_BUTTON:
+			zoom *= 2.0;
+			break;
+		}
+
+	}
+
+	glutPostRedisplay();
 }
 
 FractalViewer::~FractalViewer()
