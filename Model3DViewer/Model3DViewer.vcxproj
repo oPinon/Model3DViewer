@@ -84,6 +84,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FractalViewer.cpp" />
     <ClCompile Include="LoadShader.cpp" />
     <ClCompile Include="LoadTexture.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -92,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bitmap.h" />
+    <ClInclude Include="FractalViewer.h" />
     <ClInclude Include="LoadShader.h" />
     <ClInclude Include="LoadTexture.h" />
     <ClInclude Include="Mesh.h" />
