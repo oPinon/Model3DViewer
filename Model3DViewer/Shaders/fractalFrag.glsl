@@ -1,4 +1,6 @@
-#version 140
+#version 400
+
+uniform double ratio, zoom, offX, offY;
 
 in float posX, posY;
 
@@ -8,11 +10,14 @@ void main() {
 
 	// TODO : color_ramps
 
-	float x = posX;
-	float y = posY;
+	double x0 = zoom * posX * ratio + offX;;
+	double y0 = zoom * posY + offY;
 
-	float xtemp = 0;
-	float ytemp = 0;
+	double x = x0;
+	double y = y0;
+
+	double xtemp = 0;
+	double ytemp = 0;
 
 	int iterations = 0;
 
@@ -21,13 +26,13 @@ void main() {
 		if(x*x + y*y > 4.) { break; }
 		else { iterations++; }
 
-		xtemp = x*x - y*y + posX;
-		ytemp = 2*x*y + posY;
+		xtemp = x*x - y*y + x0;
+		ytemp = 2*x*y + y0;
 
 		x = xtemp; y = ytemp;
 	}
 
-	float value = 1. - iterations / 200.;
+	float value = iterations / 200.;
 
 	color = vec4( value, value, value, 1.);
 }

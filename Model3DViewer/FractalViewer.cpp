@@ -10,8 +10,8 @@ int FractalViewer::_width = 800, FractalViewer::_height = 800;
 
 GLuint FractalViewer::shaderID;
 GLuint FractalViewer::ratioPos, FractalViewer::zoomPos, FractalViewer::offXPos, FractalViewer::offYPos;
-float FractalViewer::zoom = 1;
-float FractalViewer::offX = 0, FractalViewer::offY = 0;
+double FractalViewer::zoom = 1;
+double FractalViewer::offX = 0, FractalViewer::offY = 0;
 
 FractalViewer::FractalViewer(char* name, int* argc, char* argv[])
 {
@@ -69,10 +69,10 @@ void FractalViewer::display() {
 	glUseProgram(shaderID);
 
 	// sending parameters to shader
-	glUniform1f(ratioPos, ((float)_width) / _height);
-	glUniform1f(zoomPos, zoom);
-	glUniform1f(offXPos, offX);
-	glUniform1f(offYPos, offY);
+	glUniform1d(ratioPos, ((double)_width) / _height);
+	glUniform1d(zoomPos, zoom);
+	glUniform1d(offXPos, offX);
+	glUniform1d(offYPos, offY);
 
 	// Quad with fractals on it
 	glBegin(GL_QUADS);
@@ -100,8 +100,11 @@ void FractalViewer::keyboard(unsigned char key, int x, int y) {
 		glutDestroyWindow(_windowID);
 		exit(0);
 		break;
-	case 'v':
+	case 'v': // reload shader
 		loadShader(); break;
+	case 'r': // reset view
+		zoom = 1; offX = 0; offY = 0;
+		break;
 	}
 
 	glutPostRedisplay();
