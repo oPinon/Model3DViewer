@@ -31,7 +31,7 @@ void main( void )
 	// Diffuse and Specular lighting
 	vec3 lightPos = vec3(20.,0.,5.);
 	vec3 L = normalize( lightPos - position );
-	float NdotL = abs(dot( N, L ));
+	float NdotL = max(0.,dot( N, L ));
 	vec3 E = normalize( - position );
 	vec3 R = -reflect( L, N );
 	float NdotHV = max( dot( R, E ), 0.0 );
